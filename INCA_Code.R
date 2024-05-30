@@ -137,3 +137,125 @@ INCA <- read.csv("INCA_FULL.csv")
 #   quantity of people within the full buffer around the project.
 
 
+##### Looking at the Data:
+# The variation between methods and areas used is large, range = 23-63,961.89
+ggplot(SUNS_Diss) +
+  geom_density(aes(x = People)) +
+  labs(title = "Quantities of Social Support",
+       x = "Counts of Associated Residential Support",
+       y = "Times") +
+  geom_vline(aes(xintercept = mean(People)), linewidth = 1, col = "tomato") +
+  geom_vline(aes(xintercept = median(People)), linewidth = 1, col = "slateblue") +
+  theme_minimal()
+
+#minimum count of 'people' = 23
+#maximum count of 'people' = 63961.89
+#mean count of 'people' = 9,074.192
+#Median count of 'people' = 4,098.725
+
+#This range includes very different methods of capturing social benefit. 
+# You can count the population in an area using landscan or census,
+# you can count the number of buildings in an area, or
+# you can count the number of parcels and identify what types of parcels are in an area (like res parcels).
+#It is important to identify what you are trying to capturing and what your method of social benefit captures when trying to identify the amount of people benefited from a project.  
+#As you can see, the distribution of the 5 methods presented here are quite different:
+ggplot(SUNS_Diss) +
+  geom_density(aes(x = People)) +
+  labs(title = "Quantities of Social Support",
+       x = "Counts of Associated Residential Support",
+       y = "Times") +
+  theme_minimal() +
+  xlim(0,50000) +
+  facet_grid(rows = vars(Method)) 
+
+#In this project we analyze the two methods for identifying populations within an 'envelope of resilience' - landscan and census. 
+#We then analyze what the 'envelope of resilience means by looking at the three different buffers around the footprint, the point of a project, and the intersection with the floodplain.
+
+
+#First, sub-setting to only include the Full buffers & the population metrics -> floodplain is looked at later.  
+# Q1: Are the methods of capturing populations surrounding projects similar?
+
+Q1DF <- subset(INCA, INCA$Method == "Landscan Sum" | INCA$Method == "Census Population")
+
+ggQ1 <- ggplot(subset(Q1DF, Q1DF$Area == "Full Buffer"), aes(y = People, x = Method, fill = Start)) +
+  geom_violin() + #can be violin or box plot...
+#  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Population Surrounding SUNS Projects",
+       x = "",
+       y = "Population",
+       fill = "NBS Projects \n Buffered From:") 
+ggQ1
+
+# H0: The distribution of landscan Sum and Census populations are the same. 
+# The Kolmogorov-Smirnov test is used to test whether or not two samples come from the same distribution. 
+data1 <- subset(Q1DF, Q1DF$Method == "Landscan Sum" & Q1DF$Area == "Full Buffer" & Start == "Footprint")
+data2 <- subset(Q1DF, Q1DF$Method == "Census Population" & Q1DF$Area == "Full Buffer" & Start == "Footprint")
+ks.test(data1$People, data2$People)
+# the p-value is 0.5153. Since the p-value is grater than 0.05, we accept the null hypothesis and the two samples come from the same distribution.
+
+data1 <- subset(Q1DF, Q1DF$Method == "Landscan Sum" & Q1DF$Area == "Full Buffer" & Start == "Point")
+data2 <- subset(Q1DF, Q1DF$Method == "Census Population" & Q1DF$Area == "Full Buffer" & Start == "Point")
+ks.test(data1$People, data2$People)
+# the p-value is 0.05247. Since the p-value is grater than 0.05, we accept the null hypothesis and the two samples come from the same distribution.
+
+# When testing the envelope methods individually (i.e. the full buffer around a point and the full buffer around the footprint), 
+# both the Landscan and Census provided similar distributions of population counts. 
+
+#Conclusion:
+# Yes, population estimates around projects are similar when compairing Landscan and Census. 
+# Therefore, we recommend Landscan for future population counts within a project area. 
+# This method is similar to the population distribution captured by Census, is easier to use, and has a finer and more precise resolution. 
+
+
+#Q2: are there other reasonable metrics for capturing population benefits
+# Another method for capturing social benefits is to count the number of buildings within the 'envelope of resilience'
+Q2DF <- subset(INCA, INCA$Method == "Parcel Building Count" & INCA$Area == "Full Buffer")
+
+# The number of buildings surrounding the SUNS projects is between 682 - 33,876 buildings within the 'envelope of resilience'
+# These numbers have such a wide spread because the floodplain of a 0.3 km buffer around a point is much smaller than the full 1km buffer around the project footprint.
+# These numbers are also lower than the population estimates because they are counting two different things. Population is counting people, and building counts are taking the total buildings within the buffer.
+
+ggQ2 <- ggplot(Q2DF, aes(y = People, x = Buffer, fill = Start)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Buildings Surrounding SUNS Projects",
+       x = "Social Estimates",
+       y = "Building Counts",
+       fill = "NBS Projects \n Buffered From:") 
+
+ggQ2
+
+# We assume that the number of buildings located within the 'envelope of resilience' increases as the area increases.
+
+# H0: The distribution of the three different buffers are the same. 
+# The Kolmogorov-Smirnov test is used to test whether or not two samples come from the same distribution. 
+data1 <- subset(Q2DF, Buffer == "Buffer 0.3km" & Start == "Footprint")
+data2 <- subset(Q2DF, Buffer == "Buffer 0.5km" & Start == "Footprint")
+data3 <- subset(Q2DF, Buffer == "Buffer 1km" & Start == "Footprint")
+ks.test(data1$People, data2$People)# D = 0.31944, the p-value is 0.001289 
+ks.test(data1$People, data3$People)# D = 0.55556, the p-value is 4.467e-10
+ks.test(data2$People, data3$People)# D = 0.45833, the p-value is 5.399e-07
+# We reject the null hypothesis for all three buffers and we fail to show that the buffers are from the same distribution. 
+kruskal.test(People ~ Buffer, data = subset(Q2DF, Q2DF$Start == "Footprint"))
+# the p-value is 3.825e-10. Since the p-value is less than 0.05, we reject the null hypothesis and can conclude that there are significant differences between the buffer groups.
+#### <- This is not paired!!! I need a paired test!!
+
+data1 <- subset(Q2DF, Buffer == "Buffer 0.3km" & Start == "Point")
+data2 <- subset(Q2DF, Buffer == "Buffer 0.5km" & Start == "Point")
+data3 <- subset(Q2DF, Buffer == "Buffer 1km" & Start == "Point")
+ks.test(data1$People, data2$People)# D = 0.37662, the p-value is 3.611e-05 
+ks.test(data1$People, data3$People)# D = 0.67532, the p-value is 1.11e-15
+ks.test(data2$People, data3$People)# D = 0.50649, the p-value is 5.276e-09
+#We reject the null hypothesis for all three buffers and we fail to show that the buffers are from the same distribution. 
+kruskal.test(People ~ Buffer, data = subset(Q2DF, Q2DF$Start == "Point"))
+# the p-value is 1.825e-14. Since the p-value is less than 0.05, we reject the null hypothesis and can conclude that there are significant differences between the buffer groups.
+#### <- This is not paired!!! I need a paired test!!
+
+
+#Conclusion:
+# Counting the amount of buildings within the envelope of resilience is another way to showcase the benefits available surrounding SUNS projects. 
+# The number of buildings tends to increase the larger the buffer for both footprints and points. 
+# Additionally, the footprint estimate is larger than the point estimates. 
+
+
