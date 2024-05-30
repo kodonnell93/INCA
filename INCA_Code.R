@@ -16,3 +16,17 @@
 # buffers using the parcel tax database, and 4) the total number of residential 
 # serving parcels. Residential serving parcels included, residential parcels,
 # public parks, schools, etc.
+
+#Library's used for this project:
+library(ggplot2)
+library(tidyr)
+library(tidyverse)
+library(RColorBrewer)
+library(dplyr)
+library(ggpubr)
+library(readxl)
+library(purrr)
+library(dgof)
+
+
+
