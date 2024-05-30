@@ -208,7 +208,7 @@ ks.test(data1$People, data2$People)
 # This method is similar to the population distribution captured by Census, is easier to use, and has a finer and more precise resolution. 
 
 
-#Q2: are there other reasonable metrics for capturing population benefits
+#Q2: Are there other reasonable metrics for capturing population benefits?
 # Another method for capturing social benefits is to count the number of buildings within the 'envelope of resilience'
 Q2DF <- subset(INCA, INCA$Method == "Parcel Building Count" & INCA$Area == "Full Buffer")
 
@@ -257,5 +257,19 @@ kruskal.test(People ~ Buffer, data = subset(Q2DF, Q2DF$Start == "Point"))
 # Counting the amount of buildings within the envelope of resilience is another way to showcase the benefits available surrounding SUNS projects. 
 # The number of buildings tends to increase the larger the buffer for both footprints and points. 
 # Additionally, the footprint estimate is larger than the point estimates. 
+# We recommend a 0.5km buffer for the 'envelope of resilience'. 
+#   The 1km buffer may over estimate the population benefits and is the most different from the other buffer sizes. 
+#   The 0.3km buffer may under estimate the population benefits and may not fully capture building counts and census populations because of resolution differences. 
 
+#Q3: How does the full buffer compare to the floodplain?
+Q3DF <- subset(INCA, INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer" | INCA$Area == "FEMA SFHA")
 
+ggQ3 <- ggplot(Q3DF, aes(y = People, x = Area, fill = Start)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Population Surrounding SUNS Projects within the Floodplain",
+       x = "",
+       y = "Population",
+       fill = "NBS Projects \n Buffered From:") 
+
+ggQ3
