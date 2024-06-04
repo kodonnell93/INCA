@@ -160,13 +160,15 @@ ggplot(SUNS_Diss) +
 #It is important to identify what you are trying to capturing and what your method of social benefit captures when trying to identify the amount of people benefited from a project.  
 #As you can see, the distribution of the 5 methods presented here are quite different:
 ggplot(SUNS_Diss) +
-  geom_density(aes(x = People)) +
+  geom_density(aes(x = People, fill = Method)) +
   labs(title = "Quantities of Social Support",
        x = "Counts of Associated Residential Support",
        y = "Times") +
   theme_minimal() +
+  theme(legend.position = "none") +
   xlim(0,50000) +
-  facet_grid(rows = vars(Method)) 
+  facet_grid(rows = vars(Method)) +
+  scale_fill_brewer(palette = "Set2")
 
 #In this project we analyze the two methods for identifying populations within an 'envelope of resilience' - landscan and census. 
 #We then analyze what the 'envelope of resilience means by looking at the three different buffers around the footprint, the point of a project, and the intersection with the floodplain.
@@ -178,8 +180,8 @@ ggplot(SUNS_Diss) +
 Q1DF <- subset(INCA, INCA$Method == "Landscan Sum" | INCA$Method == "Census Population")
 
 ggQ1 <- ggplot(subset(Q1DF, Q1DF$Area == "Full Buffer"), aes(y = People, x = Method, fill = Start)) +
-  geom_violin() + #can be violin or box plot...
-#  geom_boxplot() +
+#  geom_violin() + #can be violin or box plot...
+  geom_boxplot() +
   theme_minimal() +
   labs(title = "Population Surrounding SUNS Projects",
        x = "",
@@ -226,7 +228,68 @@ ggQ2 <- ggplot(Q2DF, aes(y = People, x = Buffer, fill = Start)) +
 
 ggQ2
 
-# We assume that the number of buildings located within the 'envelope of resilience' increases as the area increases.
+Q2bDF <- subset(INCA, INCA$Method == "Parcel Building Count" | INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer")
+
+ggQ2b <- ggplot(Q2bDF, aes(y = People, x = Method, fill = Start)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Population counts vs. Building counts",
+       y = "Social Estimates",
+       fill = "NBS Projects \n Buffered From:")
+
+ggQ2b
+
+Q2cDF <- subset(INCA, INCA$Method == "Landscan Sum" | INCA$Method == "Residential Parcels" & INCA$Area == "Full Buffer")
+
+ggQ2c <- ggplot(Q2cDF, aes(y = People, x = Method, fill = Start)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Population counts vs. Residential Supporting Parcels",
+       y = "Social Estimates",
+       fill = "NBS Projects \n Buffered From:")
+
+ggQ2c
+
+
+#Conclusion:
+#There are a lot of methods!
+
+#Q3: Which buffer is the "best" to use for population estimates?
+Q3DF <- subset(INCA, INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer" )
+
+ggQ3 <- ggplot(Q3DF, aes(y = People, x = Buffer, fill = Start)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Sensitivity of the Buffers",
+       x = "",
+       y = "Populations") 
+
+ggQ3
+
+kruskal.test(People ~ Buffer, data = subset(Q3DF, Q2DF$Start == "Footprint"))
+kruskal.test(People ~ Buffer, data = subset(Q3DF, Q2DF$Start == "Point"))
+
+
+
+#Q4: How does the full buffer compare to the floodplain?
+Q4DF <- subset(INCA, INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer" | INCA$Area == "FEMA SFHA")
+
+ggQ4 <- ggplot(Q4DF, aes(y = People, x = Area, fill = Start)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Population Surrounding SUNS Projects within the Floodplain",
+       x = "",
+       y = "Population",
+       fill = "NBS Projects \n Buffered From:") 
+
+ggQ4
+
+
+
+
+
+
+#Supplemental Material:
 
 # H0: The distribution of the three different buffers are the same. 
 # The Kolmogorov-Smirnov test is used to test whether or not two samples come from the same distribution. 
@@ -261,15 +324,3 @@ kruskal.test(People ~ Buffer, data = subset(Q2DF, Q2DF$Start == "Point"))
 #   The 1km buffer may over estimate the population benefits and is the most different from the other buffer sizes. 
 #   The 0.3km buffer may under estimate the population benefits and may not fully capture building counts and census populations because of resolution differences. 
 
-#Q3: How does the full buffer compare to the floodplain?
-Q3DF <- subset(INCA, INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer" | INCA$Area == "FEMA SFHA")
-
-ggQ3 <- ggplot(Q3DF, aes(y = People, x = Area, fill = Start)) +
-  geom_boxplot() +
-  theme_minimal() +
-  labs(title = "Population Surrounding SUNS Projects within the Floodplain",
-       x = "",
-       y = "Population",
-       fill = "NBS Projects \n Buffered From:") 
-
-ggQ3
