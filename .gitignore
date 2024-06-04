@@ -51,3 +51,5 @@ rsconnect/
 # Datasets
 Footprint_all_TableToExcel.xlsx
 Point_all_TableToExcel.xlsx
+ProjectFootprint_CCAPID.csv
+Buff05Points_FNAI_CLC.csv

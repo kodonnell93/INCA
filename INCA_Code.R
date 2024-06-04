@@ -78,9 +78,16 @@ PS <- c("LYN04", "PAN08", "PAN18", "BAY02", "BAY10", "BAY05", "PAN20", "PAN06", 
 dfProject_footprint <- lapply(df_footprint, function(x) subset(x, !(SUNSID %in% PS)))
 dfProject_point <- lapply(df_point, function(x) subset(x, !(SUNSID %in% PS)))
 
+#Making sure all the data frames have all instances of the projects
+ProjectsID <- data.frame("SUNSID" = dfProject_footprint$Buff1km_SumWithin4$SUNSID)
+dfProject_footprint <- lapply(dfProject_footprint, function(x) merge(x, ProjectsID, by = "SUNSID", all=T))
+ProjectsID <- data.frame("SUNSID" = unique(dfProject_point$Buff1km_SumWithin4$SUNSID))
+dfProject_point <- lapply(dfProject_point, function(x) merge(x, ProjectsID, by = "SUNSID", all=T))
+
 #replace blank cells with 0 - cells with a blank means there was no "people" in that area for that method
 dfProject_footprint <- lapply(dfProject_footprint, function(x) replace(x, is.na(x), 0))
 dfProject_point <- lapply(dfProject_point, function(x) replace(x, is.na(x), 0))
+
 
 # create two dataframes with the name of the list items as a column for both footprint and point 
 # the list names are "[buffer][area]_SumWithin4"
@@ -109,11 +116,15 @@ SUNS_Diss$Method <- factor(SUNS_Diss$Method, levels = c('Landscan', 'Census', 'B
 INCA$Method <- factor(INCA$Method, levels = c('Landscan_pop', 'Census_pop20', 'ParcelAll_bldgcnt', 'ParcelRes_count', 'ParcelAll_count'),
                       labels = c("Landscan Sum", "Census Population", "Parcel Building Count", "Residential Parcels", "All Parcels"))
 
+INCA$Buffer <- ifelse(grepl("Buff03", INCA$CNames), "0.3", 
+                      ifelse(grepl("Buff05", INCA$CNames), "0.5",
+                             ifelse(grepl("Buff1", INCA$CNames), "1", "TBD")))
+
 
 SUNS_Diss$Buffer <- factor(SUNS_Diss$Buffer, levels = c("0.3", "0.5", "1"), 
                            labels = c("Buffer 0.3km", "Buffer 0.5km", "Buffer 1km"))
 
-INCA$Buffer <- factor(INCA$BUFF_DIST, levels = c(300, 500, 1000), 
+INCA$Buffer <- factor(INCA$Buffer, levels = c("0.3", "0.5", "1"), 
                       labels = c("Buffer 0.3km", "Buffer 0.5km", "Buffer 1km"))
 
 
@@ -122,6 +133,8 @@ INCA$Area <- ifelse(grepl("SLR2", INCA$CNames), "SLR2ft",
                            ifelse(grepl("km", INCA$CNames), "Full", "TBD")))
 INCA$Area <- factor(INCA$Area, levels = c("Full", "SFHA", "SLR2ft"),
                     labels = c("Full Buffer", "FEMA SFHA", "2ft. of SLR"))
+
+table(INCA$Area, INCA$Buffer) #line to check the counts of numbers. All numbers in the table should be the same!
 
 
 #write.csv(INCA, file = "INCA_FULL.csv")
@@ -257,7 +270,6 @@ ggQ2c <- ggplot(Q2cDF, aes(y = People, x = Method, fill = Start)) +
 ggQ2c
 
 wilcox.test(People ~ Method, data = Q2cDF, paired = TRUE)
-
 #V = 55199, p-value < 2.2e-16
 
 #Conclusion:
@@ -290,9 +302,10 @@ kruskal.test(People ~ Buffer, data = subset(Q3DF, Q3DF$Start == "Point"))
 #2) Population benefits increase as the buffer increases in size. 
 #3) The 0.5km buffer is in the middle and closest to both the 0.3km buffer and the 1km buffer. It also is less different between footprint and points than the 0.3km buffer.
 
+# Therefore, we recommend using the 0.5km buffer around a footprint where possible. 
 
 #Q4: How does the full buffer compare to the floodplain?
-Q4DF <- subset(INCA, INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer" | INCA$Area == "FEMA SFHA")
+Q4DF <- subset(INCA, INCA$Area == "Full Buffer" & INCA$Method == "Landscan Sum" | INCA$Area == "FEMA SFHA" & INCA$Method == "Landscan Sum")
 
 ggQ4 <- ggplot(Q4DF, aes(y = People, x = Area, fill = Start)) +
   geom_boxplot() +
@@ -304,12 +317,72 @@ ggQ4 <- ggplot(Q4DF, aes(y = People, x = Area, fill = Start)) +
 
 ggQ4
 
+wilcox.test(People ~ Area, data = Q4DF, paired = TRUE)
+#V = 58311, p-value < 2.2e-16
 
+ggQ4b <- ggplot(Q4DF, aes(y = People, x = Buffer, fill = Area)) +
+  geom_boxplot() +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Paired") +
+  labs(title = "Population Surrounding SUNS Projects within the Floodplain",
+       x = "",
+       y = "Population",
+       fill = "Buffer Area")
 
+ggQ4b
 
+# Subset of Living Shoreline Projects
+LS <- c("BAY01", "BAY02", "BAY03", "BAY04", "BAY05", "BAY10", "CAL01", "FRA01", "FRA03", "FRA11", "FRA12", "LYN01", "LYN03", "PAN01", "PAN10", "PAN13", "PAN16", "PAN19", "PAR04", "CAL02", "FRA02", "FRA04", "FRA05", "FRA07", "FRA08", "FRA09", "FRA10", "GUL01", "PAN04", "PAR03", "TYN02", "TYN03", "TYN04", "TYN05", "TYN06")
+Q4DF$NBSType <- ifelse(Q4DF$SUNSID %in% LS, "Living Shoreline", "Other NBS")
 
+ggQ4c <- ggplot(Q4DF, aes(y = People, x = NBSType, fill = Area)) +
+  geom_boxplot() +
+  theme_minimal() + 
+  scale_fill_brewer(palette = "Paired") +
+  labs(title = "Population Surrounding SUNS Living Shoreline Projects \n within the Floodplain",
+       x = "",
+       y = "Population",
+       fill = "Buffer Area")
+ggQ4c
 
 #Supplemental Material:
+
+#H0: The project size has no influence on the population estimates. 
+# matching the people numbers to the project size and landcover data
+ProjectF <- read.csv("ProjectFootprint_CCAPID.csv")
+names(ProjectF) = c("SUNSID", "County", "NBS1", "NBS2", "NBS3", "NBS4", "AreaKM", "PNUplands", "PWetlands", "PWater", "PAltered", "PHardened")
+
+INCA_size <- left_join(x = INCA, y = ProjectF, by = "SUNSID")
+# some projects are only given as a point. Therefore, a 0.5 km buffer is used for area and land cover
+# The average area of given footprints is 0.75 km. 
+
+points <- unique(INCA_size$SUNSID[is.na(INCA_size$AreaKM)])
+
+ProjectP <- read.csv("Buff05Points_FNAI_CLC.csv")
+ProjectOP <- ProjectP[ProjectP$SUNSID %in% points,]
+
+Projects <- bind_rows(ProjectF, ProjectOP)
+
+Projects_long <- pivot_longer(Projects, cols = c('PNUplands', 'PWetlands', 'PWater', 'PAltered'), names_to = "LandCover", values_to = "Percent", values_drop_na = TRUE)
+
+ggplot(Projects_long) +
+  geom_bar(aes(x = SUNSID, y = Percent, fill = LandCover), stat = "identity")
+
+
+INCA_size<-left_join(x = INCA, y = Projects, by = "SUNSID")
+INCA_size$AreaBin <- cut(INCA_size$AreaKM, breaks = c(0,0.5, 1.5, 15), labels = c("small", "medium", "large"))
+
+SQ1DF <- subset(INCA_size, INCA_size$Method == "Landscan Sum" & INCA_size$Area == "Full Buffer" & INCA_size$Buffer == "Buffer 0.5km")
+
+Sup1 <- ggplot(SQ1DF, aes(x = AreaBin, y = People, fill = AreaBin)) + 
+  geom_boxplot() +
+  labs(x = "Size of Project", y = "Population", title = "Population Estimates by Size of Project", fill = "Project Size") +
+  theme_minimal() +
+  theme(axis.text.x = element_blank()) +
+  scale_fill_brewer(palette = "Greens") 
+Sup1
+
+# Conclusion: The population estimates are not significantly different between the three sizes tested. 
 
 # H0: The distribution of the three different buffers are the same. 
 # The Kolmogorov-Smirnov test is used to test whether or not two samples come from the same distribution. 
@@ -334,13 +407,4 @@ ks.test(data2$People, data3$People)# D = 0.50649, the p-value is 5.276e-09
 kruskal.test(People ~ Buffer, data = subset(Q2DF, Q2DF$Start == "Point"))
 # the p-value is 1.825e-14. Since the p-value is less than 0.05, we reject the null hypothesis and can conclude that there are significant differences between the buffer groups.
 #### <- This is not paired!!! I need a paired test!!
-
-
-#Conclusion:
-# Counting the amount of buildings within the envelope of resilience is another way to showcase the benefits available surrounding SUNS projects. 
-# The number of buildings tends to increase the larger the buffer for both footprints and points. 
-# Additionally, the footprint estimate is larger than the point estimates. 
-# We recommend a 0.5km buffer for the 'envelope of resilience'. 
-#   The 1km buffer may over estimate the population benefits and is the most different from the other buffer sizes. 
-#   The 0.3km buffer may under estimate the population benefits and may not fully capture building counts and census populations because of resolution differences. 
 
