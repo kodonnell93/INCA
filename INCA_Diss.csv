@@ -1,0 +1,91 @@
+"","Method","Buffer","Start","Area","People"
+"1","Census Population","Buffer 0.3km","Point","Full",6396.25
+"2","Census Population","Buffer 0.5km","Point","Full",17164.03
+"3","Census Population","Buffer 1km","Point","Full",49746.75
+"4","Census Population","Buffer 1km","Footprint","Full",63961.89
+"5","Census Population","Buffer 0.5km","Footprint","Full",33775.52
+"6","Census Population","Buffer 0.3km","Footprint","Full",20992.62
+"8","Residential Parcels","Buffer 0.3km","Point","Full",3291
+"9","Residential Parcels","Buffer 0.5km","Point","Full",8440
+"10","Residential Parcels","Buffer 1km","Point","Full",22398
+"11","Residential Parcels","Buffer 1km","Footprint","Full",28472
+"12","Residential Parcels","Buffer 0.5km","Footprint","Full",16143
+"13","Residential Parcels","Buffer 0.3km","Footprint","Full",10358
+"15","Parcel Building Count","Buffer 0.3km","Point","Full",3390
+"16","Parcel Building Count","Buffer 0.5km","Point","Full",4806
+"17","Parcel Building Count","Buffer 1km","Point","Full",11485
+"18","Parcel Building Count","Buffer 1km","Footprint","Full",33876
+"19","Parcel Building Count","Buffer 0.5km","Footprint","Full",19020
+"20","Parcel Building Count","Buffer 0.3km","Footprint","Full",12025
+"22","All Parcels","Buffer 0.3km","Point","Full",5390
+"23","All Parcels","Buffer 0.5km","Point","Full",6460
+"24","All Parcels","Buffer 1km","Point","Full",14475
+"25","All Parcels","Buffer 1km","Footprint","Full",43074
+"26","All Parcels","Buffer 0.5km","Footprint","Full",25397
+"27","All Parcels","Buffer 0.3km","Footprint","Full",16831
+"29","Landscan Sum","Buffer 0.3km","Point","Full",5576
+"30","Landscan Sum","Buffer 0.5km","Point","Full",15303
+"31","Landscan Sum","Buffer 1km","Point","Full",44479
+"32","Landscan Sum","Buffer 1km","Footprint","Full",56369
+"33","Landscan Sum","Buffer 0.5km","Footprint","Full",30010
+"34","Landscan Sum","Buffer 0.3km","Footprint","Full",18486
+"36","Census Population","Buffer 0.3km","Footprint","SFHA",4098.45
+"37","Census Population","Buffer 0.5km","Footprint","SFHA",5442.04
+"38","Census Population","Buffer 1km","Footprint","SFHA",8524.14
+"39","Census Population","Buffer 1km","Point","SFHA",6801.71
+"40","Census Population","Buffer 0.5km","Point","SFHA",2347.31
+"41","Census Population","Buffer 0.3km","Point","SFHA",1099.54
+"43","All Parcels","Buffer 1km","Footprint","SFHA",13716
+"44","Parcel Building Count","Buffer 1km","Footprint","SFHA",6390
+"45","All Parcels","Buffer 0.3km","Footprint","SFHA",7184
+"46","Parcel Building Count","Buffer 0.3km","Footprint","SFHA",3519
+"47","All Parcels","Buffer 0.5km","Footprint","SFHA",9474
+"48","Parcel Building Count","Buffer 0.5km","Footprint","SFHA",4488
+"49","All Parcels","Buffer 0.3km","Point","SFHA",1872
+"50","Parcel Building Count","Buffer 0.3km","Point","SFHA",682
+"51","All Parcels","Buffer 0.5km","Point","SFHA",3926
+"52","Parcel Building Count","Buffer 0.5km","Point","SFHA",1659
+"53","All Parcels","Buffer 1km","Point","SFHA",9719
+"54","Parcel Building Count","Buffer 1km","Point","SFHA",4351
+"57","Residential Parcels","Buffer 0.3km","Footprint","SFHA",3856
+"58","Residential Parcels","Buffer 0.5km","Footprint","SFHA",5016
+"59","Residential Parcels","Buffer 1km","Footprint","SFHA",7381
+"60","Residential Parcels","Buffer 1km","Point","SFHA",5425
+"61","Residential Parcels","Buffer 0.5km","Point","SFHA",2021
+"62","Residential Parcels","Buffer 0.3km","Point","SFHA",870
+"64","Landscan Sum","Buffer 0.3km","Footprint","SFHA",3710
+"65","Landscan Sum","Buffer 0.5km","Footprint","SFHA",5036
+"66","Landscan Sum","Buffer 1km","Footprint","SFHA",7866
+"67","Landscan Sum","Buffer 1km","Point","SFHA",6444
+"68","Landscan Sum","Buffer 0.5km","Point","SFHA",2061
+"69","Landscan Sum","Buffer 0.3km","Point","SFHA",899
+"71","All Parcels","Buffer 1km","Point","SLR2ft",2872
+"72","Parcel Building Count","Buffer 1km","Point","SLR2ft",139
+"73","All Parcels","Buffer 1km","Footprint","SLR2ft",4099
+"74","Parcel Building Count","Buffer 1km","Footprint","SLR2ft",211
+"75","All Parcels","Buffer 0.5km","Point","SLR2ft",1228
+"76","Parcel Building Count","Buffer 0.5km","Point","SLR2ft",68
+"77","All Parcels","Buffer 0.3km","Point","SLR2ft",591
+"78","Parcel Building Count","Buffer 0.3km","Point","SLR2ft",23
+"79","All Parcels","Buffer 0.5km","Footprint","SLR2ft",2622
+"80","Parcel Building Count","Buffer 0.5km","Footprint","SLR2ft",123
+"81","All Parcels","Buffer 0.3km","Footprint","SLR2ft",1897
+"82","Parcel Building Count","Buffer 0.3km","Footprint","SLR2ft",94
+"85","Residential Parcels","Buffer 0.3km","Footprint","SLR2ft",900
+"86","Residential Parcels","Buffer 0.5km","Footprint","SLR2ft",1227
+"87","Residential Parcels","Buffer 1km","Footprint","SLR2ft",2055
+"88","Residential Parcels","Buffer 1km","Point","SLR2ft",1519
+"89","Residential Parcels","Buffer 0.5km","Point","SLR2ft",556
+"90","Residential Parcels","Buffer 0.3km","Point","SLR2ft",242
+"92","Census Population","Buffer 0.3km","Footprint","SLR2ft",261
+"93","Census Population","Buffer 0.5km","Footprint","SLR2ft",309
+"94","Census Population","Buffer 1km","Footprint","SLR2ft",448
+"95","Census Population","Buffer 1km","Point","SLR2ft",328
+"96","Census Population","Buffer 0.5km","Point","SLR2ft",210
+"97","Census Population","Buffer 0.3km","Point","SLR2ft",137
+"99","Landscan Sum","Buffer 0.3km","Footprint","SLR2ft",94
+"100","Landscan Sum","Buffer 0.5km","Footprint","SLR2ft",162
+"101","Landscan Sum","Buffer 1km","Footprint","SLR2ft",367
+"102","Landscan Sum","Buffer 1km","Point","SLR2ft",309
+"103","Landscan Sum","Buffer 0.5km","Point","SLR2ft",86
+"104","Landscan Sum","Buffer 0.3km","Point","SLR2ft",31

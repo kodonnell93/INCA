@@ -125,8 +125,10 @@ INCA$Area <- factor(INCA$Area, levels = c("Full", "SFHA", "SLR2ft"),
 
 
 #write.csv(INCA, file = "INCA_FULL.csv")
+#write.csv(SUNS_Diss, file = "INCA_Diss.csv")
 
 INCA <- read.csv("INCA_FULL.csv")
+SUNS_Diss <- read.csv("INCA_Diss.csv")
 
 # we now have the dataframes of SUNS_Diss and INCA
 # SUNS_Diss = the total quantity of people in the 3 areas (full buffer, Intersection with SFHA, and Intersection with 2ft. of SLR) for the 3 buffers (0.3km, 0.5km, and 1km). 
@@ -228,7 +230,8 @@ ggQ2 <- ggplot(Q2DF, aes(y = People, x = Buffer, fill = Start)) +
 
 ggQ2
 
-Q2bDF <- subset(INCA, INCA$Method == "Parcel Building Count" | INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer")
+
+Q2bDF <- subset(INCA, INCA$Method == "Parcel Building Count" & INCA$Area == "Full Buffer" | INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer")
 
 ggQ2b <- ggplot(Q2bDF, aes(y = People, x = Method, fill = Start)) +
   geom_boxplot() +
@@ -239,7 +242,10 @@ ggQ2b <- ggplot(Q2bDF, aes(y = People, x = Method, fill = Start)) +
 
 ggQ2b
 
-Q2cDF <- subset(INCA, INCA$Method == "Landscan Sum" | INCA$Method == "Residential Parcels" & INCA$Area == "Full Buffer")
+wilcox.test(People ~ Method, data = Q2bDF, paired = TRUE)
+#V = 52394, p-value = 5.702e-13
+
+Q2cDF <- subset(INCA, INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer" | INCA$Method == "Residential Parcels" & INCA$Area == "Full Buffer")
 
 ggQ2c <- ggplot(Q2cDF, aes(y = People, x = Method, fill = Start)) +
   geom_boxplot() +
@@ -250,25 +256,39 @@ ggQ2c <- ggplot(Q2cDF, aes(y = People, x = Method, fill = Start)) +
 
 ggQ2c
 
+wilcox.test(People ~ Method, data = Q2cDF, paired = TRUE)
+
+#V = 55199, p-value < 2.2e-16
 
 #Conclusion:
 #There are a lot of methods!
 
 #Q3: Which buffer is the "best" to use for population estimates?
 Q3DF <- subset(INCA, INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer" )
+Only_Points <- c("CAR05", "CAR06", "PAN03", "PAN14","PAN21")
+Q3DF <- subset(Q3DF, Q3DF$SUNSID != Only_Points) # I can't do a paired test until the points and the footprints are the same!
 
-ggQ3 <- ggplot(Q3DF, aes(y = People, x = Buffer, fill = Start)) +
+ggQ3 <- ggplot(Q3DF, aes(y = People, x = Buffer)) +
   geom_boxplot() +
   theme_minimal() +
   labs(title = "Sensitivity of the Buffers",
        x = "",
-       y = "Populations") 
+       y = "Populations") +
+  facet_grid(~Start) +
+  stat_compare_means(method = "wilcox.test", paired = TRUE, comparisons = list(c("Buffer 0.3km", "Buffer 0.5km"), c("Buffer 0.3km", "Buffer 1km"), c("Buffer 0.5km", "Buffer 1km"))) 
 
 ggQ3
 
-kruskal.test(People ~ Buffer, data = subset(Q3DF, Q2DF$Start == "Footprint"))
-kruskal.test(People ~ Buffer, data = subset(Q3DF, Q2DF$Start == "Point"))
 
+kruskal.test(People ~ Buffer, data = subset(Q3DF, Q3DF$Start == "Footprint"))
+#chi-squared = 27.345, df = 2, p-value = 1.154e-06
+kruskal.test(People ~ Buffer, data = subset(Q3DF, Q3DF$Start == "Point"))
+#chi-squared = 49.564, df = 2, p-value = 1.727e-11
+
+#Conclusions:
+#1) Using Footprint and Points as starting points provide different estimates of population benefits. 
+#2) Population benefits increase as the buffer increases in size. 
+#3) The 0.5km buffer is in the middle and closest to both the 0.3km buffer and the 1km buffer. It also is less different between footprint and points than the 0.3km buffer.
 
 
 #Q4: How does the full buffer compare to the floodplain?
