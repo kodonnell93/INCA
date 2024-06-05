@@ -276,9 +276,9 @@ wilcox.test(People ~ Method, data = Q2cDF, paired = TRUE)
 #There are a lot of methods!
 
 #Q3: Which buffer is the "best" to use for population estimates?
-Q3DF <- subset(INCA, INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer" )
-Only_Points <- c("CAR05", "CAR06", "PAN03", "PAN14","PAN21")
-Q3DF <- subset(Q3DF, Q3DF$SUNSID != Only_Points) # I can't do a paired test until the points and the footprints are the same!
+Q3DF <- subset(INCA, INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer" & INCA$Start == "Footprint")
+#Only_Points <- c("CAR05", "CAR06", "PAN03", "PAN14","PAN21")
+#Q3DF <- subset(Q3DF, Q3DF$SUNSID != Only_Points) # I can't do a paired test until the points and the footprints are the same!
 
 ggQ3 <- ggplot(Q3DF, aes(y = People, x = Buffer)) +
   geom_boxplot() +
@@ -286,7 +286,6 @@ ggQ3 <- ggplot(Q3DF, aes(y = People, x = Buffer)) +
   labs(title = "Sensitivity of the Buffers",
        x = "",
        y = "Populations") +
-  facet_grid(~Start) +
   stat_compare_means(method = "wilcox.test", paired = TRUE, comparisons = list(c("Buffer 0.3km", "Buffer 0.5km"), c("Buffer 0.3km", "Buffer 1km"), c("Buffer 0.5km", "Buffer 1km"))) 
 
 ggQ3
