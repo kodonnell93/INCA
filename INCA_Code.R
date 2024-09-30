@@ -27,6 +27,7 @@ library(ggpubr)
 library(readxl)
 library(purrr)
 library(dgof)
+library(flextable)
 
 # First we read in a csv that has estimates of the full SUNS area, not split by project. 
 Diss_INCA <- read.csv("FullAreaEstimates.csv") #dissolved inca area
@@ -153,9 +154,13 @@ SUNS_Diss <- read.csv("INCA_Diss.csv")
 
 
 ##### Looking at the Data:
+# When dissolving the buffers around individual projects, the numbers of LandScan to US Census are similar, 
+# where as the number of buildings is quite lower. 
+
+
 # The variation between methods and areas used is large, range = 23-63,961.89
 ggplot(SUNS_Diss) +
-  geom_density(aes(x = People)) +
+  geom_histogram(aes(x = People), binwidth = 2000) +
   labs(title = "Quantities of Social Support",
        x = "Counts of Associated Residential Support",
        y = "Times") +
