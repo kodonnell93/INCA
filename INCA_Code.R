@@ -30,9 +30,7 @@ library(dgof)
 library(flextable)
 
 # First we read in a csv that has estimates of the full SUNS area, not split by project. 
-Diss_INCA <- read.csv("FullAreaEstimates.csv") #dissolved inca area
-County_INCA <- subset(Diss_INCA, Diss_INCA$Start == "County") #subsetting the people estimate counts for the 3 count reagion
-SUNS_Diss <- subset(Diss_INCA, Diss_INCA$Start != "County") #subsetting the people estimate counts for the dissolved inca area
+SUNS_Diss <- read.csv("FullAreaEstimates.csv") #dissolved inca area
 
 # Then we read in the two excel files that have people estimates for each individual project (overlapping buffers are accounted for and each project has it's own full buffer)
 path_footprint <- print("Footprint_all_TableToExcel.xlsx") # path to the people estimates for the buffers around a SUNS project footprint
@@ -154,10 +152,7 @@ SUNS_Diss <- read.csv("INCA_Diss.csv")
 
 
 ##### Looking at the Data:
-# When dissolving the buffers around individual projects, the numbers of LandScan to US Census are similar, 
-# where as the number of buildings is quite lower. 
-
-
+# First looking at all areas tested dissolved into one shape, aka. the SUNS_Diss data frame: 
 # The variation between methods and areas used is large, range = 23-63,961.89
 ggplot(SUNS_Diss) +
   geom_histogram(aes(x = People), binwidth = 2000) +
@@ -169,9 +164,9 @@ ggplot(SUNS_Diss) +
   theme_minimal()
 
 #minimum count of 'people' = 23
-#maximum count of 'people' = 63961.89
-#mean count of 'people' = 9,074.192
-#Median count of 'people' = 4,098.725
+#maximum count of 'people' = 63961.89 or 205108 when including county
+#mean count of 'people' = 9,074.192 or 20413 when including county
+#Median count of 'people' = 4,098.725 or 5016 when including county
 
 #This range includes very different methods of capturing social benefit. 
 # You can count the population in an area using landscan or census,
@@ -180,7 +175,7 @@ ggplot(SUNS_Diss) +
 #It is important to identify what you are trying to capturing and what your method of social benefit captures when trying to identify the amount of people benefited from a project.  
 #As you can see, the distribution of the 5 methods presented here are quite different:
 ggplot(SUNS_Diss) +
-  geom_density(aes(x = People, fill = Method)) +
+  geom_histogram(aes(x = People, fill = Method)) +
   labs(title = "Quantities of Social Support",
        x = "Counts of Associated Residential Support",
        y = "Times") +
@@ -189,6 +184,13 @@ ggplot(SUNS_Diss) +
   xlim(0,50000) +
   facet_grid(rows = vars(Method)) +
   scale_fill_brewer(palette = "Set2")
+
+# Creating a table to show the final "People counts" of the full areas all dissolved together
+Diss_tb <- SUNS_Diss[,c("Method", "Buffer", "Start", "Area", "People")] %>%
+  subset(Area == "Full") %>% # sub-setting the data frame to only have the full areas and excluding the SFHA and 2 ft. of SLR sub areas
+  pivot_wider(names_from = Method, values_from = People)
+
+as_flextable(Diss_tb[, c("Buffer", "Start", "Census Population", "Landscan Sum", "Parcel Building Count", "Residential Parcels", "All Parcels")])
 
 #In this project we analyze the two methods for identifying populations within an 'envelope of resilience' - landscan and census. 
 #We then analyze what the 'envelope of resilience means by looking at the three different buffers around the footprint, the point of a project, and the intersection with the floodplain.
