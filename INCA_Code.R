@@ -192,11 +192,12 @@ Diss_tb <- SUNS_Diss[,c("Method", "Buffer", "Start", "Area", "People")] %>%
 
 as_flextable(Diss_tb[, c("Buffer", "Start", "Census Population", "Landscan Sum", "Parcel Building Count", "Residential Parcels", "All Parcels")])
 
-#In this project we analyze the two methods for identifying populations within an 'envelope of resilience' - landscan and census. 
+
+#In this project we analyze methods for identifying populations within an 'envelope of resilience'
 #We then analyze what the 'envelope of resilience means by looking at the three different buffers around the footprint, the point of a project, and the intersection with the floodplain.
 
 
-#First, sub-setting to only include the Full buffers & the population metrics -> floodplain is looked at later.  
+#First, sub-setting to only include the Full buffers & the population metrics (i.e. census and landscan) -> floodplain is looked at later.  
 # Q1: Are the methods of capturing populations surrounding projects similar?
 
 Q1DF <- subset(INCA, INCA$Method == "Landscan Sum" | INCA$Method == "Census Population")
@@ -231,8 +232,43 @@ ks.test(data1$People, data2$People)
 # Therefore, we recommend Landscan for future population counts within a project area. 
 # This method is similar to the population distribution captured by Census, is easier to use, and has a finer and more precise resolution. 
 
+#Q2: How sensitive are population estimates to the definition of our 'envelope of resilience'?
 
-#Q2: Are there other reasonable metrics for capturing population benefits?
+#Q2A: Using project footprint or project points
+Q2ADF <- subset(INCA, INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer")
+
+
+
+#Q2B: Which buffer is the "best" to use for population estimates?
+Q2BDF <- subset(INCA, INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer" & INCA$Start == "Footprint")
+#Only_Points <- c("CAR05", "CAR06", "PAN03", "PAN14","PAN21")
+#Q3DF <- subset(Q3DF, Q3DF$SUNSID != Only_Points) # I can't do a paired test until the points and the footprints are the same!
+
+ggQ2B <- ggplot(Q2BDF, aes(y = People, x = Buffer)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Sensitivity of the Buffers",
+       x = "",
+       y = "Populations") +
+  stat_compare_means(method = "wilcox.test", paired = TRUE, comparisons = list(c("Buffer 0.3km", "Buffer 0.5km"), c("Buffer 0.3km", "Buffer 1km"), c("Buffer 0.5km", "Buffer 1km"))) 
+
+ggQ2B
+
+
+kruskal.test(People ~ Buffer, data = subset(Q2BDF, Q2BDF$Start == "Footprint"))
+#chi-squared = 27.345, df = 2, p-value = 1.154e-06
+kruskal.test(People ~ Buffer, data = subset(Q2BDF, Q2BDF$Start == "Point"))
+#chi-squared = 49.564, df = 2, p-value = 1.727e-11
+
+#Conclusions:
+#1) Using Footprint and Points as starting points provide different estimates of population benefits. 
+#2) Population benefits increase as the buffer increases in size. 
+#3) The 0.5km buffer is in the middle and closest to both the 0.3km buffer and the 1km buffer. It also is less different between footprint and points than the 0.3km buffer.
+
+# Therefore, we recommend using the 0.5km buffer around a footprint where possible. 
+
+
+#Q4: Are there other reasonable metrics for capturing population benefits?
 # Another method for capturing social benefits is to count the number of buildings within the 'envelope of resilience'
 Q2DF <- subset(INCA, INCA$Method == "Parcel Building Count" & INCA$Area == "Full Buffer")
 
@@ -282,33 +318,6 @@ wilcox.test(People ~ Method, data = Q2cDF, paired = TRUE)
 #Conclusion:
 #There are a lot of methods!
 
-#Q3: Which buffer is the "best" to use for population estimates?
-Q3DF <- subset(INCA, INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer" & INCA$Start == "Footprint")
-#Only_Points <- c("CAR05", "CAR06", "PAN03", "PAN14","PAN21")
-#Q3DF <- subset(Q3DF, Q3DF$SUNSID != Only_Points) # I can't do a paired test until the points and the footprints are the same!
-
-ggQ3 <- ggplot(Q3DF, aes(y = People, x = Buffer)) +
-  geom_boxplot() +
-  theme_minimal() +
-  labs(title = "Sensitivity of the Buffers",
-       x = "",
-       y = "Populations") +
-  stat_compare_means(method = "wilcox.test", paired = TRUE, comparisons = list(c("Buffer 0.3km", "Buffer 0.5km"), c("Buffer 0.3km", "Buffer 1km"), c("Buffer 0.5km", "Buffer 1km"))) 
-
-ggQ3
-
-
-kruskal.test(People ~ Buffer, data = subset(Q3DF, Q3DF$Start == "Footprint"))
-#chi-squared = 27.345, df = 2, p-value = 1.154e-06
-kruskal.test(People ~ Buffer, data = subset(Q3DF, Q3DF$Start == "Point"))
-#chi-squared = 49.564, df = 2, p-value = 1.727e-11
-
-#Conclusions:
-#1) Using Footprint and Points as starting points provide different estimates of population benefits. 
-#2) Population benefits increase as the buffer increases in size. 
-#3) The 0.5km buffer is in the middle and closest to both the 0.3km buffer and the 1km buffer. It also is less different between footprint and points than the 0.3km buffer.
-
-# Therefore, we recommend using the 0.5km buffer around a footprint where possible. 
 
 #Q4: How does the full buffer compare to the floodplain?
 Q4DF <- subset(INCA, INCA$Area == "Full Buffer" & INCA$Method == "Landscan Sum" | INCA$Area == "FEMA SFHA" & INCA$Method == "Landscan Sum")
