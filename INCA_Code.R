@@ -237,12 +237,31 @@ ks.test(data1$People, data2$People)
 #Q2A: Using project footprint or project points
 Q2ADF <- subset(INCA, INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer")
 
+Point_Only <- c("CAR05", "CAR06", "PAN03", "PAN14", "PAN21")
+Q2ADF <- subset(Q2ADF, !SUNSID %in% Point_Only)
+
+ggQ2A <- ggplot(Q2ADF, aes(y = People, x = Start)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Starting Area",
+       x = "",
+       y = "Populations") +
+  stat_compare_means(method = "wilcox.test", paired = TRUE)
+
+ggQ2A
+
+kruskal.test(People ~ Start, data = Q2ADF)
+#chi-squared = 33.166, df = 1, p-value = 8.462e-09
+
+aggregate(People ~ Start, Q2ADF, function(x) c(mean = mean(x), sd = sd(x))) # the average and SD for the point is lower
+
+#Conclusions:
+#1) Using Footprint and Points as starting points provide different estimates of population benefits, points provides significantly less population counts
+#2) The variation of data is also higher for the estimates using the footprint as a starting area. 
 
 
 #Q2B: Which buffer is the "best" to use for population estimates?
 Q2BDF <- subset(INCA, INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer" & INCA$Start == "Footprint")
-#Only_Points <- c("CAR05", "CAR06", "PAN03", "PAN14","PAN21")
-#Q3DF <- subset(Q3DF, Q3DF$SUNSID != Only_Points) # I can't do a paired test until the points and the footprints are the same!
 
 ggQ2B <- ggplot(Q2BDF, aes(y = People, x = Buffer)) +
   geom_boxplot() +
@@ -257,26 +276,25 @@ ggQ2B
 
 kruskal.test(People ~ Buffer, data = subset(Q2BDF, Q2BDF$Start == "Footprint"))
 #chi-squared = 27.345, df = 2, p-value = 1.154e-06
-kruskal.test(People ~ Buffer, data = subset(Q2BDF, Q2BDF$Start == "Point"))
-#chi-squared = 49.564, df = 2, p-value = 1.727e-11
+#kruskal.test(People ~ Buffer, data = subset(Q2BDF, Q2BDF$Start == "Point"))
+##chi-squared = 49.564, df = 2, p-value = 1.727e-11
 
 #Conclusions:
-#1) Using Footprint and Points as starting points provide different estimates of population benefits. 
-#2) Population benefits increase as the buffer increases in size. 
-#3) The 0.5km buffer is in the middle and closest to both the 0.3km buffer and the 1km buffer. It also is less different between footprint and points than the 0.3km buffer.
+#1) Population benefits increase as the buffer increases in size. 
+#2) The 0.5km buffer is in the middle and closest to both the 0.3km buffer and the 1km buffer. It also is less different between footprint and points than the 0.3km buffer.
 
 # Therefore, we recommend using the 0.5km buffer around a footprint where possible. 
 
 
-#Q4: Are there other reasonable metrics for capturing population benefits?
+#Q3: Are there other reasonable metrics for capturing population benefits?
 # Another method for capturing social benefits is to count the number of buildings within the 'envelope of resilience'
-Q2DF <- subset(INCA, INCA$Method == "Parcel Building Count" & INCA$Area == "Full Buffer")
+Q3DFa <- subset(INCA, INCA$Method == "Parcel Building Count" & INCA$Area == "Full Buffer")
 
 # The number of buildings surrounding the SUNS projects is between 682 - 33,876 buildings within the 'envelope of resilience'
 # These numbers have such a wide spread because the floodplain of a 0.3 km buffer around a point is much smaller than the full 1km buffer around the project footprint.
 # These numbers are also lower than the population estimates because they are counting two different things. Population is counting people, and building counts are taking the total buildings within the buffer.
 
-ggQ2 <- ggplot(Q2DF, aes(y = People, x = Buffer, fill = Start)) +
+ggQ3a <- ggplot(Q3DFa, aes(y = People, x = Buffer, fill = Start)) +
   geom_boxplot() +
   theme_minimal() +
   labs(title = "Buildings Surrounding SUNS Projects",
@@ -284,35 +302,35 @@ ggQ2 <- ggplot(Q2DF, aes(y = People, x = Buffer, fill = Start)) +
        y = "Building Counts",
        fill = "NBS Projects \n Buffered From:") 
 
-ggQ2
+ggQ3a
 
 
-Q2bDF <- subset(INCA, INCA$Method == "Parcel Building Count" & INCA$Area == "Full Buffer" | INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer")
+Q3bDF <- subset(INCA, INCA$Method == "Parcel Building Count" & INCA$Area == "Full Buffer" | INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer")
 
-ggQ2b <- ggplot(Q2bDF, aes(y = People, x = Method, fill = Start)) +
+ggQ3b <- ggplot(Q3bDF, aes(y = People, x = Method, fill = Start)) +
   geom_boxplot() +
   theme_minimal() +
   labs(title = "Population counts vs. Building counts",
        y = "Social Estimates",
        fill = "NBS Projects \n Buffered From:")
 
-ggQ2b
+ggQ3b
 
-wilcox.test(People ~ Method, data = Q2bDF, paired = TRUE)
+wilcox.test(People ~ Method, data = Q3bDF, paired = TRUE)
 #V = 52394, p-value = 5.702e-13
 
-Q2cDF <- subset(INCA, INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer" | INCA$Method == "Residential Parcels" & INCA$Area == "Full Buffer")
+Q3cDF <- subset(INCA, INCA$Method == "Landscan Sum" & INCA$Area == "Full Buffer" | INCA$Method == "Residential Parcels" & INCA$Area == "Full Buffer")
 
-ggQ2c <- ggplot(Q2cDF, aes(y = People, x = Method, fill = Start)) +
+ggQ3c <- ggplot(Q3cDF, aes(y = People, x = Method, fill = Start)) +
   geom_boxplot() +
   theme_minimal() +
   labs(title = "Population counts vs. Residential Supporting Parcels",
        y = "Social Estimates",
        fill = "NBS Projects \n Buffered From:")
 
-ggQ2c
+ggQ3c
 
-wilcox.test(People ~ Method, data = Q2cDF, paired = TRUE)
+wilcox.test(People ~ Method, data = Q3cDF, paired = TRUE)
 #V = 55199, p-value < 2.2e-16
 
 #Conclusion:
@@ -320,9 +338,14 @@ wilcox.test(People ~ Method, data = Q2cDF, paired = TRUE)
 
 
 #Q4: How does the full buffer compare to the floodplain?
+# Given previous tests we have suggested using:
+#LandScan for the method,
+#Footprints for the starting areas, and
+#the 0.5km buffer size.
+
 Q4DF <- subset(INCA, INCA$Area == "Full Buffer" & INCA$Method == "Landscan Sum" | INCA$Area == "FEMA SFHA" & INCA$Method == "Landscan Sum")
 
-ggQ4 <- ggplot(Q4DF, aes(y = People, x = Area, fill = Start)) +
+ggQ4 <- ggplot(subset(Q4DF, Q4DF$Buffer == "Buffer 0.5km" & Q4DF$Start == "Footprint"), aes(y = People, x = Area)) +
   geom_boxplot() +
   theme_minimal() +
   labs(title = "Population Surrounding SUNS Projects within the Floodplain",
@@ -394,7 +417,8 @@ Sup1 <- ggplot(SQ1DF, aes(x = AreaBin, y = People, fill = AreaBin)) +
   labs(x = "Size of Project", y = "Population", title = "Population Estimates by Size of Project", fill = "Project Size") +
   theme_minimal() +
   theme(axis.text.x = element_blank()) +
-  scale_fill_brewer(palette = "Greens") 
+  scale_fill_brewer(palette = "Greens") +
+  stat_compare_means(paired = TRUE)
 Sup1
 
 # Conclusion: The population estimates are not significantly different between the three sizes tested. 
